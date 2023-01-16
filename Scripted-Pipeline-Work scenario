@@ -1,5 +1,3 @@
-##Another Simple-SCRIPTED-PIPELINE(Real world project):
-
 node {
     def mvnHome =  tool name: 'maven_home', type: 'maven'
     stage('SCM-Checkout') {
