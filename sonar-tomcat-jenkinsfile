@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+        tools {
+            maven 'maven_home'
+            }	
+    stages {
+	    stage('SCM-Checkout') { 
+            steps {
+                git branch: 'main', credentialsId: 'git-credential', 
+		        url: 'https://github.com/blessedralph/webjob-03.git' 
+            }
+        }
+        stage('maven') { 
+            steps {
+                sh "mvn compile test package" 
+            }
+        }
+        stage('Sonar-analysis') { 
+            steps {
+               withSonarQubeEnv("sonar-server") {
+			     sh "mvn sonar:sonar"
+				}
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true  
+               }
+			}
+        }
+		stage('Tomcat-Deployment') {
+            steps {
+                sshagent(['tomcat-ssh-credentials']) {
+					sh "scp -o StrictHostKeyChecking=no target/tomcat-demo.war ec2-user@172.31.45.219:/opt/tomcat/webapps"
+				}
+            }
+        }
+	}
+}
