@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+        tools {
+            maven 'maven_home'
+            }	
+    stages {
+	    stage('SCM-Checkout') { 
+            steps {
+                git branch: 'main', credentialsId: 'git-credential', 
+		        url: 'https://github.com/blessedralph/webjob-03.git' 
+            }
+        }
+        stage('Maven-Steps') { 
+            steps {
+                sh "mvn compile test package" 
+            }
+        }
+        stage('Tomcat-Deployment') { 
+            steps {
+                sshagent(['tomcat-credential']) {
+                    sh "scp -o StrictHostKeyChecking=no target/*.war ec2-user@3.19.32.74:/opt/tomcat/webapps"
+                }
+			}
+        }		
+    }
+} 
