@@ -1,0 +1,42 @@
+a.	Spin up an EC2 instance and login,
+b.	Become a root user
+c.	Install Java:  amazon-linux-extras install java-openjdk11 -y
+d.	Install tomcat:
+         i. cd /opt
+         ii. wget https:// https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.71/bin/apache-tomcat-9.0.71.tar.gz===to install tomcat 
+tar -xvzf apache-tomcat-9.0.71.tar.gz===== to untar the file:
+mv apache-tomcat-9.0.71 tomcat=====to rename the file
+rm -rf apache-tomcat-9.0.71.tar.gz====to delete the unwanted tar file
+cd tomcat/bin
+./shutdown.sh
+./startup.sh
+chown -R ec2-user:ec2-user tomcat===to change the ownership from root to ec2user. Check with the command ls -l
+https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.71/bin/apache-tomcat-9.0.71.tar.gz
+
+
+check your machine on port <public-ip>:8080
+To proceed forward, we need to fix two things 
+a.	find / -name context.xml===to find the location of context.xml
+nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
+comment out the 2 lines starting with valve and allow, using <!-- this at the start and --> at the end
+save and exit.
+Repeat the same operation nano /opt/tomcat/webapps/manager/META-INF/context.xml, comment out the same statement as earlier.
+nano /opt/tomcat/conf/context.xml
+nano /opt/tomcat/webapps/examples/META-INF/context.xml
+nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
+nano /opt/tomcat/webapps/manager/META-INF/context.xml
+cd ..
+cd conf/
+b.	nano tomcat-users.xml, copy and paste the below scripts into the open file just above the last line. Then save and exit
+<role rolename="manager-gui"/>
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
+<role rolename="manager-status"/>
+<user username="tomcat" password="pass123" roles="manager-gui"/>
+<user username="admin" password="admin123" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+Go back to bin folder
+./shutdown.sh
+./startup.sh ==> Tomcat should be up and running.
+Go back to tomcat webpage and refresh it, signin with of the two user names you have in the last script
+(username="tomcat" password="pass123")
+(username="admin" password="admin123").
